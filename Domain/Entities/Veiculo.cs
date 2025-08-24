@@ -3,22 +3,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace minimal_api.Domain.Entities
 {
-    [Table(name: "ADMINS")]
-    public class Admin
+    [Table(name: "VEICULOS")]
+    public class Veiculo
     {
         [Key]
         public int Id { get; set; }
 
         [Required]
-        [StringLength(255)]
-        public string Email { get; set; }
+        [StringLength(150)]
+        public string Nome { get; set; }
 
         [Required]
-        [StringLength(50)]
-        public string Senha { get; set; }
+        [StringLength(100)]
+        public string Marca { get; set; }
 
         [Required]
-        [StringLength(10)]
-        public string Role { get; set; }
+        public int Ano { get; set; }
     }
 }
