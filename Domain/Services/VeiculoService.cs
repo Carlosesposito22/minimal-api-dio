@@ -1,5 +1,7 @@
-﻿using minimal_api.Domain.Entities;
+﻿using minimal_api.Domain.DTOs;
+using minimal_api.Domain.Entities;
 using minimal_api.Domain.Interfaces;
+using minimal_api.Domain.ViewModel;
 using minimal_api.Infra.Db;
 
 namespace minimal_api.Domain.Services
@@ -52,6 +54,27 @@ namespace minimal_api.Domain.Services
         {
             _context.Update(veiculo);
             _context.SaveChanges();
+        }
+
+        public static ErrosDeValidacao ValidaVeiculoDto(VeiculoDTO veiculoDTO)
+        {
+            var validacao = new ErrosDeValidacao();
+
+            if (string.IsNullOrEmpty(veiculoDTO.Nome))
+            {
+                validacao.Menssagens.Add("O nome nao pode ser vazio");
+            }
+
+            if (string.IsNullOrEmpty(veiculoDTO.Marca))
+            {
+                validacao.Menssagens.Add("A Marca nao pode ser vazia");
+            }
+
+            if (veiculoDTO.Ano < 1950)
+            {
+                validacao.Menssagens.Add("O veiculo é muito velho. compre um moderno!");
+            }
+            return validacao;
         }
     }
 }

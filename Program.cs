@@ -53,6 +53,13 @@ app.MapGet("/veiculos", ([FromQuery] int? page, [FromQuery] string? nome, [FromQ
 
 app.MapPost("/veiculo", ([FromBody] VeiculoDTO veiculoDTO, IVeiculoService veiculoService) =>
 {
+    var validacao = VeiculoService.ValidaVeiculoDto(veiculoDTO);
+
+    if (validacao.Menssagens.Count > 0)
+    {
+        return Results.BadRequest(validacao);
+    }
+
     var veiculo = new minimal_api.Domain.Entities.Veiculo
     {
         Nome = veiculoDTO.Nome,
@@ -81,6 +88,12 @@ app.MapPut("/veiculo/{id}", ( [FromRoute] int id, VeiculoDTO veiculoDTO ,IVeicul
     if (veiculo == null)
     {
         return Results.NotFound();
+    }
+
+    var validacao = VeiculoService.ValidaVeiculoDto(veiculoDTO);
+    if (validacao.Menssagens.Count > 0)
+    {
+        return Results.BadRequest(validacao);
     }
 
     veiculo.Ano = veiculoDTO.Ano;
