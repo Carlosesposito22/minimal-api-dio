@@ -1,10 +1,13 @@
  using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using minimal_api.Domain.DTOs;
+using minimal_api.Domain.Entities;
 using minimal_api.Domain.Interfaces;
 using minimal_api.Domain.Services;
 using minimal_api.Domain.ViewModel;
 using minimal_api.Infra.Db;
+
+#region App
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +18,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IVeiculoService, VeiculoService>();
 
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -30,9 +32,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+#endregion
 
-app.MapControllers();
+#region Login
 
 app.MapGet("/", () => Results.Json(new Home())).WithTags("Home");
 
@@ -44,6 +46,65 @@ app.MapPost("/login", ([FromBody] LoginDTO loginDTO, IAdminService adminService)
     }
     return Results.Unauthorized();
 }).WithTags("Admin");
+
+#endregion
+
+#region Admin
+
+app.MapGet("/admins", ([FromQuery] int? page, IAdminService adminService) =>
+{
+    return Results.Ok(adminService.GetAll(page ?? 1));
+}).WithTags("Admin");
+
+app.MapGet("admin/{id}", ([FromRoute] int id, IAdminService adminService) =>
+{
+    var admin = adminService.FindById(id);
+
+    if (admin == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(admin);
+}).WithTags("Admin");
+
+app.MapPost("/admin", ([FromBody] AdminDTO adminDTO, IAdminService adminService) =>
+{
+    var validacao = new ErrosDeValidacao();
+
+    if (string.IsNullOrEmpty(adminDTO.Email))
+    {
+        validacao.Menssagens.Add("Email nao pode ser vazio!");
+    }
+
+    if(string.IsNullOrEmpty(adminDTO.Senha))
+    {
+        validacao.Menssagens.Add("Senha nao pode ser vazia!");
+    }
+
+    if(adminDTO.Role == null)
+    {
+        validacao.Menssagens.Add("Role nao pode ser vazio!");
+    }
+
+    if (validacao.Menssagens.Count > 0)
+    {
+        return Results.BadRequest(validacao);
+    }
+
+    var admin = new Admin()
+    {
+        Email = adminDTO.Email,
+        Senha = adminDTO.Senha,
+        Role = adminDTO.Role.ToString()
+    };
+    adminService.Create(admin);
+
+    return Results.Created($"/admin/{admin.Id}", admin);
+}).WithTags("Admin");
+
+#endregion
+
+#region Veiculos
 
 app.MapGet("/veiculos", ([FromQuery] int? page, [FromQuery] string? nome, [FromQuery] string? marca, IVeiculoService veiculoService) =>
 {
@@ -117,5 +178,6 @@ app.MapDelete("/veiculo/{id}", ([FromRoute] int id, IVeiculoService veiculoServi
     return Results.NoContent();
 }).WithTags("Veiculo");
 
+#endregion
+
 app.Run();
- 
