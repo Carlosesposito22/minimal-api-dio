@@ -1,7 +1,6 @@
  using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using minimal_api.Domain.DTOs;
-using minimal_api.Domain.Entities;
 using minimal_api.Domain.Interfaces;
 using minimal_api.Domain.Services;
 using minimal_api.Domain.ViewModel;
@@ -65,4 +64,45 @@ app.MapPost("/veiculo", ([FromBody] VeiculoDTO veiculoDTO, IVeiculoService veicu
     return Results.Created($"/veiculo/{veiculo.Id}", veiculo);
 }).WithTags("Veiculo");
 
+app.MapGet("veiculo/{id}", ([FromRoute] int id, IVeiculoService veiculoService) =>
+{
+    var veiculo = veiculoService.FindById(id);
+
+    if (veiculo == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(veiculo);
+}).WithTags("Veiculo");
+
+app.MapPut("/veiculo/{id}", ( [FromRoute] int id, VeiculoDTO veiculoDTO ,IVeiculoService veiculoService) =>
+{
+    var veiculo = veiculoService.FindById(id);
+    if (veiculo == null)
+    {
+        return Results.NotFound();
+    }
+
+    veiculo.Ano = veiculoDTO.Ano;
+    veiculo.Nome = veiculoDTO.Nome;
+    veiculo.Marca = veiculoDTO.Marca;
+
+    veiculoService.Update(veiculo);
+
+    return Results.Ok(veiculo);
+}).WithTags("Veiculo");
+
+app.MapDelete("/veiculo/{id}", ([FromRoute] int id, IVeiculoService veiculoService) =>
+{
+    var veiculo = veiculoService.FindById(id);
+    if (veiculo == null)
+    {
+        return Results.NotFound();
+    }
+
+    veiculoService.Delete(veiculo);
+    return Results.NoContent();
+}).WithTags("Veiculo");
+
 app.Run();
+ 
