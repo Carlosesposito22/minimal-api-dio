@@ -12,5 +12,7 @@ namespace minimal_api.Domain.Interfaces
         List<Admin> GetAll(int page = 1);
 
         Admin FindById(int id);
+
+        string GerarTokenJwt(Admin admin, string key);
     }
 }
