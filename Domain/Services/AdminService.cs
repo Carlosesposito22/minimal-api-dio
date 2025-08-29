@@ -58,7 +58,8 @@ namespace minimal_api.Domain.Services
             var claims = new List<Claim>()
             {
                 new Claim("Email", admin.Email),
-                new Claim("Role", admin.Role)
+                new Claim("Role", admin.Role),
+                new Claim(ClaimTypes.Role, admin.Role)
             };
 
             var token = new JwtSecurityToken(
